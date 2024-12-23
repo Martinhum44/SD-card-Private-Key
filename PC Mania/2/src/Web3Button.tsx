@@ -10,11 +10,14 @@ type Props = {
     backgroundColor: string,
     text: string,
     params: any[],
-    value: number,
+    value?: number,
     callback: Function
 }
 
 const Web3Button:React.FC<Props> = (props: Props) => {
+    if (props.value == undefined){
+        props.value = 0
+    }
     const [buttonStyle, setButtonStyle] = useState({
         width: "150px",
         border: "none",

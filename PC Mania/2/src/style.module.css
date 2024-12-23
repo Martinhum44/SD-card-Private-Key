@@ -9,6 +9,9 @@
     align-items: center;
 }
 
+body {
+    font-family: "I";
+}
 @media (orientation: landscape) {
     .container{
         width:50%

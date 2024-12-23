@@ -892,7 +892,19 @@ const ABI = [
 	}
 ]
 
-type NFT = any
+type NFTPhoto = "box.png" | "potato.png" | "cool.png" | "gold.png"
+type NFT = {
+	listed: boolean
+	NS: number
+	xp: number, 
+	level: number
+	id: number
+	staked: boolean
+	time4stake: number
+	owner: string
+	condition: number
+	URI: string
+}
 
 type Listing = {
 	bought: boolean,
@@ -903,40 +915,96 @@ type Listing = {
 	price: number
 }
 
+const h1Styles = {fontFamily: "Inter, system-ui, Avenir, Helvetica, Arial, sans-serif"}
+
 const App:React.FC = () => {
   const [contract, setContract] = useState<any | null>(null)
   const [account, setAccount] = useState<null | string>(null)
   const [listings, setListings] = useState<Listing[]>([])
+  const [state, setState] = useState<"shop" | "buying">("shop")
+  const [currentListing, setCurrentListing] = useState<Listing>()
+
+  function photoReturn(l: Listing | undefined): NFTPhoto {
+	if(l == undefined){
+		return "box.png"
+	}
+	if(l.nftBase.NS == 3){
+		return "gold.png"
+	} else if (l.nftBase.NS == 2){
+		return "cool.png"
+	} else if (l.nftBase.NS == 1){
+		return "potato.png"
+	} else {
+		return "box.png"
+	}
+  }
+
+  function generatePCName(n: NFT | undefined): "PC Box" | "Potato PC" | "Cool PC" | "Gold PC" {
+	if(n == undefined){
+		return "PC Box"
+	}
+	if(n.NS == 1){
+		return "Potato PC"
+	} else if (n.NS == 2){
+		return "Cool PC"
+	} else if (n.NS == 3){
+		return "Gold PC"
+	} else {
+		return "Potato PC"
+	}
+  }
 
   return (
-    <>
+	<>
+    <div style={{display: state == "shop" ? "block" : "none"}}>
+		<h1 style={h1Styles}>PC Mania</h1>
       <ConnectWallet contractAddress="0xBFA57539d8B70b20CCe7F32B08a45815C04AA04D" contractABI={ABI} callback={async(a ,c)=>{
         setAccount(a); 
         setContract(c);
 		const count = (await getValue("countReturn", c))
 		console.log(count)
+		const newListings: Listing[] = []
 		for(let i = 0; i < count[1]; i++){
 			let ls = await getValue("listee", c, [i])
-			setListings(l => [...l, ls])
-			console.log(ls)
+			newListings.push(ls)
 		}
+		console.log(newListings)
+		setListings(newListings)
       }} handleChange={(a:string) => setAccount(a)}/>
-      {contract != null ? <div id="lists" style={{width: "80%", height: "500px", backgroundColor: "#CDCCCD", overflowY: "scroll", borderRadius: "20px"}}>
+      {contract != null ? <div id="lists" style={{width: "80%", height: "500px", backgroundColor: "#CDCCCD", overflowY: "scroll", borderRadius: "20px", display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "15px", paddingTop: "20px", paddingLeft: "20px", paddingBottom: "20px"}}>
 	  	{listings.map(l => {
-			let URI: "bafkreibu3wr27qrwu42jvxe2qbhbxznxup4tc7oszp5d2btwgsyu2akmp4" | "bafkreihfwu3vhs34gz6bfxh7spoazwjrk7wnpsuvs23id6tpbfexqbacd4" | "bafkreidjnya5xog3fww2shsals5byp422ntprfxlgpebfajpn6argzxlge" | "bafkreicibvdeh74lnz7f4igwksnqx3655knmqaplidqflg5pevxgkgqed" = "bafkreibu3wr27qrwu42jvxe2qbhbxznxup4tc7oszp5d2btwgsyu2akmp4"
-			if(l.nftBase.NS = 0){
-				URI = "bafkreibu3wr27qrwu42jvxe2qbhbxznxup4tc7oszp5d2btwgsyu2akmp4"
-			} else if (l.nftBase.NS == 1){
-				URI = "bafkreihfwu3vhs34gz6bfxh7spoazwjrk7wnpsuvs23id6tpbfexqbacd4"
-			} else if (l.nftBase.NS == 2){
-				URI = "bafkreidjnya5xog3fww2shsals5byp422ntprfxlgpebfajpn6argzxlge"
-			} else if (l.nftBase.NS == 3){
-				URI = "bafkreicibvdeh74lnz7f4igwksnqx3655knmqaplidqflg5pevxgkgqed"
-			}
-			return !l.bought ? <div style={{borderRadius: "10px", height:"100px", width:"100px"}}><img src={`https://cloudflare-ipfs.com/ipfs/${URI}}`}/></div> : ""
+			let URI: NFTPhoto = photoReturn(l)
+			return !l.bought ? <div style={{borderRadius: "10px", height:"200px", width:"150px", backgroundColor: "#909190"}} onMouseOver={(event) => event.currentTarget.style.backgroundColor = "#B6B6B6"}
+			onMouseOut={(event) => event.currentTarget.style.backgroundColor = "#909190"}
+			onClick={() => {
+				setState("buying")
+				setCurrentListing(listings[l.listId])
+			}}
+			>
+				<img src={URI} style={{backgroundColor: "white", marginTop: "5px", borderRadius: "100%"}}/>
+				<h5 style={h1Styles}>Cost: {Number(l.price)/1000000000/1000000000} ETH</h5>
+				<h6 style={h1Styles}>NFT id: {Number(l.nftId)}</h6>
+			</div> : ""
 		})}
-      </div> : <h1>You must sign in with your web3 wallet to see the available listings.</h1>}
-    </>
+      </div> : <h1 style={h1Styles}>You must sign in with your web3 wallet to see the available listings.</h1>}
+    </div>
+
+	<div style={{display: state == "buying" ? "block" : "none", padding: "0", alignItems: "center"}}>
+		<div style={{display: "grid", gridTemplateColumns: "4fr 6fr"}}>
+			<div>
+				<img src={photoReturn(currentListing)} style={{ marginTop: "5px", borderRadius: "20px", height: "600px", width: "90%", backgroundColor: "lightgray"}}/>
+			</div>
+			<div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+				<div style={{backgroundColor: "#EEEEEE",height: "300px",width: "80%",borderRadius: "20px"}}>
+					<h1 style={h1Styles}>{generatePCName(currentListing?.nftBase)}</h1>
+					<h3 style={h1Styles}>Lister: {currentListing?.lister}</h3>
+					<h3 style={{...h1Styles, display: currentListing?.nftBase.NS == 0 ? "none" : "block"}}>Condition: {Number(currentListing?.nftBase.condition)} / {currentListing?.nftBase.NS == 3 ? 150 : (currentListing?.nftBase.NS == 2 ? 125 : 100)}</h3>
+					<Web3Button contract={contract} value={currentListing?.price} callback={/* */} function={/* */} address={String(account)}/>
+				</div>
+			</div>
+		</div>
+	</div>
+	</>
   )
 }
 

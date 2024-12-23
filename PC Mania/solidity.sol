@@ -183,7 +183,7 @@ contract nftTime is IERC721, IERC165 {
     }
 
     mapping(uint => nftI) nfs;
-    mapping(uint => list) listee; 
+    mapping(uint => list) public listee; 
     mapping(uint => address) approvals;
     mapping(address => mapping(address => bool)) approvalsForAll;
     mapping(uint => address) stakedBy;
@@ -209,6 +209,10 @@ contract nftTime is IERC721, IERC165 {
 
     function name() external pure returns (string memory) {
         return "Personal Computers";
+    }
+
+    function countReturn() external view returns (uint, uint){
+        return (nftCount, listNumber);
     }
 
     function symbol() external pure returns (string memory) {
@@ -291,7 +295,7 @@ contract nftTime is IERC721, IERC165 {
             nfs[nftCount].NS = nftStati.pcBox;
             nfs[nftCount].id = nftCount;
             nfs[nftCount].condition = 1000;
-            _setTokenURI(nftCount, "ipts://bafkreibu3wr27qrwu42jvxe2qbhbxznxup4tc7oszp5d2btwgsyu2akmp4");
+            _setTokenURI(nftCount, "ipfs://bafkreibu3wr27qrwu42jvxe2qbhbxznxup4tc7oszp5d2btwgsyu2akmp4");
         }
         if (types == 1){
             nfs[nftCount].NS = nftStati.potatoPc;
@@ -449,7 +453,7 @@ contract nftTime is IERC721, IERC165 {
         nftI storage NFT = nfs[id];
         require(stakedBy[id] == msg.sender, "You must be the nft staker. DUH!!!");
         require(NFT.staked, "NFT hasn't been staked. Unstaking without staking. REALLY!!! LMFAO!");
-        require(block.timestamp > NFT.time4stake+30, "WAIT IMPATIENT BITCH");
+        require(block.timestamp > NFT.time4stake+3600, "WAIT IMPATIENT BITCH");
         NFT.time4stake = 0;
         contractApprove(msg.sender, id);
         transferFrom(address(this),msg.sender,id);
@@ -496,12 +500,12 @@ contract nftTime is IERC721, IERC165 {
             mine.burn(msg.sender, 25*10**18*costMultiplier);
         } else if (NFT.NS == nftStati.coolPc){
             require(wire.balanceOf(msg.sender) >= 1*costMultiplier && mine.balanceOf(msg.sender) > 50*10**18*costMultiplier, "not enough tokens");
-            NFT.condition = int(125*costMultiplier);
+            NFT.condition = int(125);
             wire.burn(msg.sender, 1*costMultiplier);
             mine.burn(msg.sender, 50*10**18*costMultiplier);
         } else if (NFT.NS == nftStati.coolPc){
             require(wire.balanceOf(msg.sender) >= 3*costMultiplier && mine.balanceOf(msg.sender) > 150*10**18*costMultiplier, "not enough tokens");
-            NFT.condition = int(150*costMultiplier);
+            NFT.condition = int(150);
             wire.burn(msg.sender, 1*costMultiplier);
             mine.burn(msg.sender, 150*10**18*costMultiplier);
         }
