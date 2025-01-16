@@ -64,11 +64,15 @@ while True:
                 PK = key_gen("".join([str(i) for i in array]).encode(), 32)[0]
                 cipher = AES.new(key, AES.MODE_CBC, IV)
                 ciphertext = cipher.encrypt(PK)
+
                 with open(f"{selection}/PK{i}.bin", "wb") as drive:
                     drive.write(ciphertext)
                 
                 with open(f"{selection}/IV{i}.bin", "wb") as drive:
                     drive.write(IV)
+
+                with open(f"{selection}/PKH{i}.bin", "wb") as drive:
+                    drive.write(Web3.keccak(PK))
             
             with open(f"{selection}/withenc.bin", "wb") as f:
                 f.write((1).to_bytes())
