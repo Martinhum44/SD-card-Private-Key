@@ -75,21 +75,18 @@ while True:
                     drive.write(Web3.keccak(PK))
             
             with open(f"{selection}/withenc.bin", "wb") as f:
-                f.write((1).to_bytes())
+                f.write(b"\x01")
         else:
             for i in range(0, int(PKs)):
                 print(f"Saving Private Key {i}...")
                 PK = key_gen("".join([str(i) for i in array]).encode(), 32)[0]
-                print(PK.hex())
                 with open(f"{selection}/PK{i}.bin", "wb") as drive:
                     drive.write(PK)
 
             with open(f"{selection}/withenc.bin", "wb") as f:
-                f.write((0).to_bytes())
+                f.write(b"\x00")
         
         print(f"Done saving {PKs} Private Keys to {selection}")
         print("Saving Python Interaction file...")
         shutil.copy("see_keys.py", selection)
         print("Saved Python Interaction file.")
-
-
