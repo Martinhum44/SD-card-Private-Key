@@ -90,3 +90,6 @@ while True:
         print("Saving Python Interaction file...")
         shutil.copy("see_keys.py", selection)
         print("Saved Python Interaction file.")
+        print("Saving GETH app")
+        shutil.copy("Geth/geth.exe",selection)
+        print("Saved GETH app \n You may close this app now.")
